@@ -31,9 +31,8 @@ $row = $query->fetch_assoc();
 $state = $row['state'];
 
 //#DEBUG# check message
-sendMessage($botToken,$chatId,$state);
-echo "Debug#41";
-sendMessage($botToken,$chatId,"Debug no.41 + sisanya yang tidak terhitung");
+echo "Debug#43";
+sendMessage($botToken,$chatId,"\nDebug#43\nState: {$state}");
 
 switch($message) {
     
@@ -56,7 +55,7 @@ switch($message) {
         break;
     
     case '/aboutUs':
-        sendMessage($botToken,$chatId,"Terima kasih sudah mau menggunakan bot kami. Bot ini dibuat oleh:\nAlfonsus Enrico @alfonsusenrico_;\nMichael Wida P. @michaelpramas;\nVito Varian L. @vito_laman\nMahasiswa biasa saja di Informatika Petra.\n");
+        sendMessage($botToken,$chatId,"Terima kasih sudah mau menggunakan bot kami. Bot ini dibuat oleh:\nAlfonsus Enrico @enrico06\nMichael Wida P. @michaelpramas\nVito Varian L. @vito_laman\nMahasiswa biasa saja di Informatika Petra.\n");
         break;
         
     default:
@@ -171,7 +170,7 @@ switch($message) {
                     break;
                     
                 default:
-                    $out = "Halo :D Silahkan mendaftarkan jadwal kamu dengan command /addJadwal. Jika belum mendaftarkan diri silahkan gunakan command /addData";
+                    $out = "Halo :D Silahkan daftarkan jadwal kamu dengan command /addJadwal. Jika belum mendaftarkan diri silahkan gunakan command /addData";
                     break;
             }
         break;
@@ -207,12 +206,13 @@ function check() {
     }
     else {
         $query = mysqli_query($conn,"SELECT userId FROM data WHERE userId = '.$userId.')");
-        $query1 = mysqli_query($conn,"SELECT userId FROM jadwal WHERE userId = '.$userId.')");
         if($query == NULL) {
             $query = mysqli_query($conn,"INSERT INTO data (userId,state) VALUES ('.$userId.','nama')");
         }
-        if($query1 == NULL) {
-            $query = mysqli_query($conn,"INSERT INTO data (userId) VALUES ('.$userId.')");
+        
+        $query = mysqli_query($conn,"SELECT userId FROM jadwal WHERE userId = '.$userId.')");
+        if($query == NULL) {
+            $query = mysqli_query($conn,"INSERT INTO jadwal (userId) VALUES ('.$userId.')");
         }
     }
 }
