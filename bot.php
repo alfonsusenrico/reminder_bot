@@ -31,8 +31,8 @@ $row = $query->fetch_assoc();
 $state = $row['state'];
 
 //#DEBUG# check message
-echo "Debug#43";
-sendMessage($botToken,$chatId,"\nDebug#43\nState: {$state}");
+echo "Debug#44";
+sendMessage($botToken,$chatId,"\nDebug#44\nState: {$state}");
 
 switch($message) {
     
@@ -66,6 +66,7 @@ switch($message) {
                     mysqli_query($conn,"UPDATE jadwal set tipe='".$message."' WHERE userId='".$userId."'");
                     $state = 'jeniskegiatan';
                     $out = "Jenis kegiatan yang ingin dijadwalkan (kelas / lain)";
+                    break;
                 
                 case 'jeniskegiatan':
                     mysqli_query($conn,"UPDATE jadwal set jenis='".$message."' WHERE userId='".$userId."'");
