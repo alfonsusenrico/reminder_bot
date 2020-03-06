@@ -4,7 +4,7 @@
 require 'connection.php';
 
 //token
-$botToken = "1099773239:AAEDlg9VuIykF7c3sOQsYU7gPTadzTLre2Y";
+$botToken = "TOKEN";
 
 //base URL API telegram bot
 $website = "https://api.telegram.org/bot".$botToken;
@@ -23,7 +23,7 @@ $out = '';
 $step = '';
 
 //Check userId dalam database
-//check();
+check();
 
 //Pengambilan state dari userId
 $query = mysqli_query($conn,"SELECT state FROM data WHERE userId = '".$userId."'");
