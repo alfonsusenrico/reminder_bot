@@ -44,9 +44,14 @@ else if ($today == 'sunday') {
     $today = 'minggu';
 }
 
+//inisialisasi variabel waktu
+date_default_timezone_set("Asia/Jakarta");
+echo date("H:i");
+
 //inisialisasi variabel
 $out = '';
 $step = '';
+$time = "21:20";
 
 //Check userId & set state berdasarkan data
 checkData();
@@ -59,10 +64,26 @@ $row = $query->fetch_assoc();
 $state = $row['state'];
 $nama = $row['nama'];
 
-//#DEBUG# check message
-echo "Debug#73_beta_release";
-    //sendMessage($botToken,$chatId,"\nDebug#73_beta\nState: {$state}");
-    sendMessage($botToken,$chatId,"Debug check id: {$id}");
+//DEBUG
+echo "Debug#73.4_beta_release";
+//sendMessage($botToken,$chatId,"\nDebug#73.3_beta\nState: {$state}");
+//sendMessage($botToken,$chatId,"Debug check id: {$id}");
+    
+//REMINDER
+if(date("H:i") == $time) {
+    sendMessage($botToken,$chatId,"Selamat pagi {$nama}! Selamat hari {$today}! Di pagi hari ini kami akan menampilkan jadwal yang sudah kamu buat untuk hari ini:");
+    $query = mysqli_query($conn,"SELECT * FROM jadwal WHERE userId = '".$userId."' AND hari = '".$today."' ORDER BY mulai");
+    $row = $query->fetch_assoc();
+    if($row == NULL) {
+        sendMessage($botToken,$chatId,"Sepertinya kamu tidak ada kegiatan yang dijadwalkan untuk hari ini. Selamat beristirahat :D");
+    }
+    else {
+        while($row = $query->fetch_assoc()) {
+            sendMessage($botToken,$chatId,"Kegiatan : {$row['jenis']}\nNama      : {$row['nama']}\nMulai       : {$row['mulai']}\nSelesai    : {$row['selesai']}\n");
+        }
+        sendMessage($botToken,$chatId,"Selamat beraktivitas!");
+    }  
+};
     
 switch($message) {
     
@@ -77,7 +98,7 @@ switch($message) {
         
     case '/start':
         $state = setState();
-        $out = "Halo :D Terima kasih telah menggunakan kami sebagai bot reminder kalian. Berikut beberapa list command yang bisa kalian gunakan:\n1. /addData\n2. /addJadwal\n3. /aboutUs";
+        $out = "Halo :D Terima kasih telah menggunakan kami sebagai bot reminder kalian. Berikut beberapa list command yang bisa kalian gunakan:\n1. /addData\n2. /addJadwal\n3. /cekJadwal\n4. /aboutUs";
         break;
         
     case '/addData':
