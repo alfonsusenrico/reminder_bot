@@ -22,7 +22,7 @@ $userId = $update["message"]["from"]["id"];
 $out = '';
 $step = '';
 
-//Check userId dalam database
+//Check userId & set state berdasarkan data
 check();
 
 //Pengambilan state dari userId
@@ -31,16 +31,18 @@ $row = $query->fetch_assoc();
 $state = $row['state'];
 
 //#DEBUG# check message
-echo "Debug#44";
-sendMessage($botToken,$chatId,"\nDebug#44\nState: {$state}");
+echo "Debug#55_beta";
+sendMessage($botToken,$chatId,"\nDebug#55_beta\nState: {$state}");
 
 switch($message) {
     
     case '/start':
+        $state = setState();
         $out = "Halo :D Terima kasih telah menggunakan kami sebagai bot reminder kalian. Berikut beberapa list command yang bisa kalian gunakan:\n1. /addData\n2. /addJadwal\n3. /aboutUs";
         break;
         
     case '/addData':
+        $state = setState();
         if($state != idle) {
             $out = "Silahkan masukkan nama kamu";
         }
@@ -50,7 +52,7 @@ switch($message) {
         break;
     
     case '/addJadwal':
-        $out = "Kegiatan rutin atau sekali jalan";
+        $out = "Kegiatan rutin atau sekali";
         $state = 'tipekegiatan';
         break;
     
@@ -99,20 +101,20 @@ switch($message) {
                     $row = $query->fetch_assoc();
                     $tipe = $row['tipe'];
 
-                    if($tipe == 'sekali') {
+                    if($tipe == 'sekali' || $tipe == 'Sekali' || $tipe == 'SEKALI') {
                         $state = 'tanggal';
                         $out = "Silahkan masukkan tanggal pelaksanaan kegiatan (YYYY:MM:DD)";
                     }
                     else {
                         $state = 'konfirmasi2';
-                        $out = "Silahkan cek ulang data jadwal kamu";
+                        $out = "Ketik apapun untuk melanjutkan";
                     }
                     break;
                     
                 case 'tanggal':
                     mysqli_query($conn,"UPDATE jadwal set tanggal='".$message."' WHERE userId='".$userId."'");
                     $state = 'konfirmasi2';
-                    $out = "Silahkan cek ulang data jadwal kamu";
+                    $out = "Ketik apapun untuk melanjutkan";
                     break;
                     
                 case 'konfirmasi2':
@@ -128,16 +130,16 @@ switch($message) {
                     $mulai = $row['mulai'];
                     $selesai = $row['selesai'];
                     
-                    if($tipe == 'rutin') {
-                        $out = "Nama kegiatan   : {$nama}\nJenis kegiatan   : {$jenis}\nHari        : {$hari}\nJam mulai    : {$mulai}\nJam selesai : {$selesai}\nApakah sudah benar? (ya/tidak)";
+                    if($tipe == 'rutin' || $tipe == 'Rutin' || $tipe == 'RUTIN') {
+                        $out = "Nama kegiatan   : {$nama}\nJenis kegiatan    : {$jenis}\nHari                : {$hari}\nJam mulai          : {$mulai}\nJam selesai         : {$selesai}\nApakah sudah benar? (ya/tidak)";
                     }
                     else {
-                        $out = "Nama kegiatan   : {$nama}\nJenis kegiatan   : {$jenis}\nHari        : {$hari}\nTanggal      : {$tanggal}\nJam mulai    : {$mulai}\nJam selesai : {$selesai}\nApakah sudah benar? (ya/tidak)";
+                        $out = "Nama kegiatan   : {$nama}\nJenis kegiatan    : {$jenis}\nHari                : {$hari}\nTanggal             : {$tanggal}\nJam mulai                : {$mulai}\nJam selesai          : {$selesai}\nApakah sudah benar? (ya/tidak)";
                     }
-                    $state = 'selesai';
+                    $state = 'terdaftar';
                     break;
                     
-                case 'selesai':
+                case 'terdaftar':
                     if($message == 'ya' || $message == 'Ya' || $message == 'YA' || $message == 'yA') {
                         $out = "Terima kasih jadwalmu sudah terdaftar!";
                     }
@@ -171,12 +173,12 @@ switch($message) {
                     break;
                     
                 default:
+                    $state = setState();
                     $out = "Halo :D Silahkan daftarkan jadwal kamu dengan command /addJadwal. Jika belum mendaftarkan diri silahkan gunakan command /addData";
                     break;
             }
         break;
 }
-
 
 mysqli_query($conn,"UPDATE data SET state='".$state."' WHERE userId ='".$userId."'");
 sendMessage($botToken,$chatId,$out);
@@ -216,6 +218,23 @@ function check() {
             $query = mysqli_query($conn,"INSERT INTO jadwal (userId) VALUES ('.$userId.')");
         }
     }
+}
+
+//function set state
+function setState() {
+    GLOBAL $conn;
+    GLOBAL $userId;
+    
+    $query = mysqli_query($conn,"SELECT nrp FROM data WHERE userId = '".$userId."'");
+    $row = $query->fetch_assoc();
+    $data = $row['nrp'];
+    if($data != NULL) {
+        $state = 'idle';
+    }
+    else {
+        $state = 'nama';
+    }
+    return $state;
 }
 
 ?>
