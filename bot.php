@@ -18,7 +18,33 @@ $message = $update["message"]["text"];
 $chatId = $update["message"]["chat"]["id"];
 $userId = $update["message"]["from"]["id"];
 
-//Coding pengaksesan database sesuai kebutuhan
+//inisialisasi variabel tanggal
+$tanggal = date("d");
+$today = strtolower(date("l"));
+
+if($today == 'monday') {
+    $today = 'senin';
+}
+else if ($today == 'tuesday') {
+    $today = 'selasa';
+}
+else if ($today == 'wednesday') {
+    $today = 'rabu';
+}
+else if ($today == 'thursday') {
+    $today = 'kamis';
+}
+else if ($today == 'friday') {
+    $today = 'jumat';
+}
+else if ($today == 'saturday') {
+    $today = 'sabtu';
+}
+else if ($today == 'sunday') {
+    $today = 'minggu';
+}
+
+//inisialisasi variabel
 $out = '';
 $step = '';
 
@@ -27,17 +53,28 @@ checkData();
 $id = '';
 $id = getId();
 
-//Pengambilan state dari userId
-$query = mysqli_query($conn,"SELECT state FROM data WHERE userId = '".$userId."'");
+//Pengambilan data penting dari data user
+$query = mysqli_query($conn,"SELECT state,nama FROM data WHERE userId = '".$userId."'");
 $row = $query->fetch_assoc();
 $state = $row['state'];
+$nama = $row['nama'];
 
 //#DEBUG# check message
-echo "Debug#68_beta_release";
-    //sendMessage($botToken,$chatId,"\nDebug#65_beta\nState: {$state}");
+echo "Debug#73_beta_release";
+    //sendMessage($botToken,$chatId,"\nDebug#73_beta\nState: {$state}");
     sendMessage($botToken,$chatId,"Debug check id: {$id}");
+    
 switch($message) {
     
+    case '/cekJadwal':
+        sendMessage($botToken,$chatId,"Halo {$nama}! Berikut seluruh kegiatan yang telah kamu jadwalkan di hari {$today} ini:");
+        $query = mysqli_query($conn,"SELECT * FROM jadwal WHERE userId = '".$userId."' AND hari = '".$today."' ORDER BY mulai");
+        while($row = $query->fetch_assoc()) {
+            sendMessage($botToken,$chatId,"Kegiatan : {$row['jenis']}\nNama      : {$row['nama']}\nMulai       : {$row['mulai']}\nSelesai    : {$row['selesai']}\n");
+        }
+        sendMessage($botToken,$chatId,"Selamat beraktivitas!");
+        break;
+        
     case '/start':
         $state = setState();
         $out = "Halo :D Terima kasih telah menggunakan kami sebagai bot reminder kalian. Berikut beberapa list command yang bisa kalian gunakan:\n1. /addData\n2. /addJadwal\n3. /aboutUs";
@@ -53,7 +90,7 @@ switch($message) {
             $row = $query->fetch_assoc();
             $nama = $row['nama'];
             $nrp = $row['nrp'];
-            $out = "Kamu tidak perlu capek-capek mendaftarkan diri lagi karena kamu sudah terdaftar :)\nNama kamu       : {$nama}\nNRP kamu         : {$nrp}";
+            $out = "Kamu tidak perlu capek-capek mendaftarkan diri lagi karena kamu sudah terdaftar :)\nNama kamu       : {$nama}\nNRP kamu          : {$nrp}";
         }
         break;
     
@@ -109,22 +146,28 @@ switch($message) {
                     $tipe = $row['tipe'];
 
                     if($tipe == 'sekali' || $tipe == 'Sekali' || $tipe == 'SEKALI') {
-                        $state = 'tanggal';
+                        $state = 'konfirmasi2';
                         $out = "Silahkan masukkan tanggal pelaksanaan kegiatan (YYYY:MM:DD)";
                     }
                     else {
-                        $state = 'konfirmasi2';
-                        $out = "Ketik apapun untuk melanjutkan";
+                        $query = mysqli_query($conn,"SELECT * FROM jadwal WHERE userId='".$userId."' AND id='".$id."'");
+                        $row = $query->fetch_assoc();
+                    
+                        //semua data jadwal
+                        $tipe = $row['tipe'];
+                        $jenis = $row['jenis'];
+                        $nama = $row['nama'];
+                        $hari = $row['hari'];
+                        $tanggal = $row['tanggal'];
+                        $mulai = $row['mulai'];
+                        $selesai = $row['selesai'];
+                        $state = 'terdaftar';        
+                        $out = "Nama kegiatan   : {$nama}\nJenis kegiatan    : {$jenis}\nHari                      : {$hari}\nJam mulai           : {$mulai}\nJam selesai         : {$selesai}\nApakah sudah benar? (ya/tidak)";
                     }
                     break;
                     
-                case 'tanggal':
-                    mysqli_query($conn,"UPDATE jadwal set tanggal='".$message."' WHERE userId='".$userId."' AND id='".$id."'");
-                    $state = 'konfirmasi2';
-                    $out = "Ketik apapun untuk melanjutkan";
-                    break;
-                    
                 case 'konfirmasi2':
+                    mysqli_query($conn,"UPDATE jadwal set tanggal='".$message."' WHERE userId='".$userId."' AND id='".$id."'");
                     $query = mysqli_query($conn,"SELECT * FROM jadwal WHERE userId='".$userId."' AND id='".$id."'");
                     $row = $query->fetch_assoc();
                     
@@ -137,12 +180,7 @@ switch($message) {
                     $mulai = $row['mulai'];
                     $selesai = $row['selesai'];
                     
-                    if($tipe == 'rutin' || $tipe == 'Rutin' || $tipe == 'RUTIN') {
-                        $out = "Nama kegiatan   : {$nama}\nJenis kegiatan    : {$jenis}\nHari                     : {$hari}\nJam mulai          : {$mulai}\nJam selesai        : {$selesai}\nApakah sudah benar? (ya/tidak)";
-                    }
-                    else {
-                        $out = "Nama kegiatan   : {$nama}\nJenis kegiatan    : {$jenis}\nHari                   : {$hari}\nTanggal             : {$tanggal}\nJam mulai           : {$mulai}\nJam selesai        : {$selesai}\nApakah sudah benar? (ya/tidak)";
-                    }
+                    $out = "Nama kegiatan   : {$nama}\nJenis kegiatan    : {$jenis}\nHari                       : {$hari}\nTanggal                : {$tanggal}\nJam mulai            : {$mulai}\nJam selesai         : {$selesai}\nApakah sudah benar? (ya/tidak)";
                     $state = 'terdaftar';
                     break;
                     
@@ -151,6 +189,7 @@ switch($message) {
                         $out = "Terima kasih jadwalmu sudah terdaftar!";
                     }
                     else {
+                        mysqli_query($conn,"DELETE FROM jadwal WHERE id='".$id."'");
                         $out = "Silahkan gunakan command /addJadwal kembali ya";
                     }
                     $state = 'idle';
@@ -174,6 +213,7 @@ switch($message) {
                         $state = 'idle';
                     }
                     else {
+                        mysqli_query($conn,"DELETE FROM data WHERE userId='".$userId."'");
                         $out = "Silahkan gunakan command /addData atau /start kembali ya";
                         $state = 'nama';
                     }
@@ -205,12 +245,7 @@ function checkData() {
     GLOBAL $conn;
     GLOBAL $userId;
     $query = mysqli_query($conn,"SELECT userId FROM data");
-    $query1 = mysqli_query($conn,"SELECT userId FROM jadwal");
     if(mysqli_num_rows($query) == 0) {
-        echo "Error: Database kosong";
-        return die;
-    }
-    if(mysqli_num_rows($query1) == 0) {
         echo "Error: Database kosong";
         return die;
     }
