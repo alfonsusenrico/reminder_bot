@@ -4,7 +4,7 @@
 require 'connection.php';
 
 //token
-$botToken = "";
+$botToken = '';
 
 //base URL API telegram bot
 $website = "https://api.telegram.org/bot".$botToken;
@@ -14,49 +14,32 @@ $content = file_get_contents("php://input");
 $update = json_decode($content, TRUE);
 
 //Mengambil text & id tiap user
+$message = 'cek';
 $message = $update["message"]["text"];
 $chatId = $update["message"]["chat"]["id"];
 $userId = $update["message"]["from"]["id"];
 
 //inisialisasi variabel tanggal
-$tanggal = date("d");
-$today = strtolower(date("l"));
-
-if($today == 'monday') {
-    $today = 'senin';
-}
-else if ($today == 'tuesday') {
-    $today = 'selasa';
-}
-else if ($today == 'wednesday') {
-    $today = 'rabu';
-}
-else if ($today == 'thursday') {
-    $today = 'kamis';
-}
-else if ($today == 'friday') {
-    $today = 'jumat';
-}
-else if ($today == 'saturday') {
-    $today = 'sabtu';
-}
-else if ($today == 'sunday') {
-    $today = 'minggu';
-}
+date_default_timezone_set("Asia/Jakarta");
+$today = getDay();
 
 //inisialisasi variabel waktu
-date_default_timezone_set("Asia/Jakarta");
+echo $today;
 echo date("H:i");
 
 //inisialisasi variabel
 $out = '';
 $step = '';
-$time = "21:20";
+$time = '';
 
 //Check userId & set state berdasarkan data
 checkData();
 $id = '';
 $id = getId();
+
+//
+echo $userId;
+echo $chatId;
 
 //Pengambilan data penting dari data user
 $query = mysqli_query($conn,"SELECT state,nama FROM data WHERE userId = '".$userId."'");
@@ -65,7 +48,7 @@ $state = $row['state'];
 $nama = $row['nama'];
 
 //DEBUG
-echo "Debug#73.4_beta_release";
+echo "Debug#83_trial_beta_release";
 //sendMessage($botToken,$chatId,"\nDebug#73.3_beta\nState: {$state}");
 //sendMessage($botToken,$chatId,"Debug check id: {$id}");
     
@@ -83,10 +66,15 @@ if(date("H:i") == $time) {
         }
         sendMessage($botToken,$chatId,"Selamat beraktivitas!");
     }  
-};
+}
     
 switch($message) {
     
+    case '/waktu':
+        $out = "Silahkan input waktu untuk reminder kamu ya (HH:MM)";
+        $state = 'waktu';
+        break;
+        
     case '/cekJadwal':
         sendMessage($botToken,$chatId,"Halo {$nama}! Berikut seluruh kegiatan yang telah kamu jadwalkan di hari {$today} ini:");
         $query = mysqli_query($conn,"SELECT * FROM jadwal WHERE userId = '".$userId."' AND hari = '".$today."' ORDER BY mulai");
@@ -128,6 +116,12 @@ switch($message) {
     default:
             
             switch($state) {
+                
+                case 'waktu':
+                    $time = $message;
+                    $out = "Waktu reminder kamu telah di set ke jam {$time}.";
+                    $state = 'idle';
+                    break;
                 
                 case 'tipekegiatan':
                     mysqli_query($conn,"UPDATE jadwal set tipe='".$message."' WHERE userId='".$userId."' AND id='".$id."'");
@@ -242,7 +236,7 @@ switch($message) {
                     
                 default:
                     $state = setState();
-                    $out = "Halo :D Silahkan daftarkan jadwal kamu dengan command /addJadwal. Jika belum mendaftarkan diri silahkan gunakan command /addData";
+                    $out = "Default check";
                     break;
             }
         break;
@@ -250,16 +244,6 @@ switch($message) {
 
 mysqli_query($conn,"UPDATE data SET state='".$state."' WHERE userId ='".$userId."'");
 sendMessage($botToken,$chatId,$out);
-
-//function sendMessage
-function sendMessage($botToken, $chatId, $message) {
-    
-    //url
-    $message = urlencode(utf8_encode($message));
-    $url = "https://api.telegram.org/bot".$botToken."/sendMessage?chat_id=".$chatId."&text=".$message;
-    file_get_contents($url);
-    
-}
 
 //function check userId
 function checkData() {
@@ -320,6 +304,45 @@ function setState() {
         $state = 'nama';
     }
     return $state;
+}
+
+//function sendMessage
+function sendMessage($botToken, $chatId, $message) {
+    
+    //url
+    $message = urlencode(utf8_encode($message));
+    $url = "https://api.telegram.org/bot".$botToken."/sendMessage?chat_id=".$chatId."&text=".$message;
+    file_get_contents($url);
+    
+}
+
+//function getDay
+function getDay() {
+    $tanggal = date("d");
+    $today = strtolower(date("l"));
+
+    if($today == 'monday') {
+        $today = 'senin';
+    }
+    else if ($today == 'tuesday') {
+        $today = 'selasa';
+    }
+    else if ($today == 'wednesday') {
+        $today = 'rabu';
+    }
+    else if ($today == 'thursday') {
+        $today = 'kamis';
+    }
+    else if ($today == 'friday') {
+        $today = 'jumat';  
+    }
+    else if ($today == 'saturday') {
+        $today = 'sabtu';
+    }
+    else { 
+        $today = 'minggu';
+    }
+    return $today;
 }
 
 ?>
