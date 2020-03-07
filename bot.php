@@ -4,7 +4,7 @@
 require 'connection.php';
 
 //token
-$botToken = "1099773239:AAEDlg9VuIykF7c3sOQsYU7gPTadzTLre2Y";
+$botToken = "TOKEN";
 
 //base URL API telegram bot
 $website = "https://api.telegram.org/bot".$botToken;
@@ -18,11 +18,10 @@ $message = $update["message"]["text"];
 $chatId = $update["message"]["chat"]["id"];
 $userId = $update["message"]["from"]["id"];
 
-//Coding pengaksesan database sesuai kebutuhan
+//inisialisasi variabel
 $out = '';
-$step = '';
 
-//Check userId & set state berdasarkan data
+//Check userId & getId jadwal
 checkData();
 $id = getId();
 
@@ -35,6 +34,8 @@ $state = $row['state'];
 echo "Debug#65_beta_release";
     //sendMessage($botToken,$chatId,"\nDebug#65_beta\nState: {$state}");
     //sendMessage($botToken,$chatId,"Debug check id: {$id}");
+
+//coding botnya
 switch($message) {
     
     case '/start':
@@ -186,12 +187,13 @@ switch($message) {
         break;
 }
 
+//query $state ke database setelah tiap state dilewati
 mysqli_query($conn,"UPDATE data SET state='".$state."' WHERE userId ='".$userId."'");
 sendMessage($botToken,$chatId,$out);
 
 //function sendMessage
 function sendMessage($botToken, $chatId, $message) {
-    
+  
     //url
     $message = urlencode(utf8_encode($message));
     $url = "https://api.telegram.org/bot".$botToken."/sendMessage?chat_id=".$chatId."&text=".$message;
@@ -201,6 +203,7 @@ function sendMessage($botToken, $chatId, $message) {
 
 //function check userId
 function checkData() {
+    
     GLOBAL $conn;
     GLOBAL $userId;
     $query = mysqli_query($conn,"SELECT userId FROM data");
@@ -219,10 +222,12 @@ function checkData() {
             $query = mysqli_query($conn,"INSERT INTO data (userId,state) VALUES ('.$userId.','nama')");
         }
     }
+    
 }
 
 //function checkJadwal
 function checkJadwal() {
+    
     GLOBAL $conn;
     GLOBAL $userId;
     $query = mysqli_query($conn,"SELECT userId FROM jadwal");
@@ -236,23 +241,26 @@ function checkJadwal() {
             $query = mysqli_query($conn,"INSERT INTO jadwal (userId) VALUES ('.$userId.')");
         }
     }
+    
 }
 
-//function get Id
+//function get Id jadwal
 function getId() {
+    
     GLOBAL $conn;
     GLOBAL $userId;
     $query = mysqli_query($conn,"SELECT id FROM jadwal WHERE userId = '".$userId."'");
     $row = $query->fetch_assoc();
     $id = $row['id'];
     return $id;
+    
 }
     
 //function set state
 function setState() {
+    
     GLOBAL $conn;
     GLOBAL $userId;
-    
     $query = mysqli_query($conn,"SELECT nrp FROM data WHERE userId = '".$userId."'");
     $row = $query->fetch_assoc();
     $data = $row['nrp'];
@@ -263,6 +271,7 @@ function setState() {
         $state = 'nama';
     }
     return $state;
+    
 }
 
 ?>
