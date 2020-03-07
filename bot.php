@@ -31,8 +31,8 @@ $row = $query->fetch_assoc();
 $state = $row['state'];
 
 //#DEBUG# check message
-echo "Debug#55_beta";
-sendMessage($botToken,$chatId,"\nDebug#55_beta\nState: {$state}");
+echo "Debug#57_beta";
+sendMessage($botToken,$chatId,"\nDebug#57_beta\nState: {$state}");
 
 switch($message) {
     
@@ -47,7 +47,11 @@ switch($message) {
             $out = "Silahkan masukkan nama kamu";
         }
         else {
-            $out = "Kamu tidak perlu capek-capek mendaftarkan diri lagi karena kamu sudah terdaftar :)";
+            $query = mysqli_query($conn,"SELECT nama,nrp FROM data WHERE userId = '".$userId."'");
+            $row = $query->fetch_assoc();
+            $nama = $row['nama'];
+            $nrp = $row['nrp'];
+            $out = "Kamu tidak perlu capek-capek mendaftarkan diri lagi karena kamu sudah terdaftar :)\nNama kamu       : {$nama}\nNRP kamu         : {$nrp}";
         }
         break;
     
