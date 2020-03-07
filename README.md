@@ -1,4 +1,4 @@
-# reminder_bot
+# Bot-(R)eminder (nama belum fix)
 
 Halo. Pertama, bot ini bukan merupakan tugas mata kuliah apapun. Bot ini murni hasil brainstorming kami terhadap salah satu
 masalah yang sering dihadapi mahasiswa, yaitu lupa jadwal. Bot ini berfungsi untuk menyimpan "jadwal hidup" dan akan memberikan
