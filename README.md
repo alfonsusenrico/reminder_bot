@@ -5,6 +5,4 @@ masalah yang sering dihadapi mahasiswa, yaitu lupa jadwal. Bot ini berfungsi unt
 notifikasi kepada user di waktu yang telah ditentukan.
 
 Devs:
-ALfonsus Enrico,
-Michael Wida P.,
-Vito Varian L.
+ALfonsus Enrico --- Michael Wida P. --- Vito Varian L.
