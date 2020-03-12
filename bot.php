@@ -1,11 +1,11 @@
 <?php
 
-//connection
+//connection dan function
 require 'connection.php';
 require 'function.php';
 
 //token
-$botToken = '1099773239:AAEDlg9VuIykF7c3sOQsYU7gPTadzTLre2Y';
+$botToken = '';
 
 //base URL API telegram bot
 $website = "https://api.telegram.org/bot".$botToken;
